@@ -44,6 +44,7 @@ import { createPortal } from 'react-dom';
 import { AdminConfig, AdminConfigResult } from '@/lib/admin.types';
 import { getAuthInfoFromBrowserCookie } from '@/lib/auth';
 
+import CacheManager from '@/components/CacheManager';
 import DataMigration from '@/components/DataMigration';
 import PageLayout from '@/components/PageLayout';
 
@@ -4907,6 +4908,7 @@ function AdminPageClient() {
     categoryConfig: false,
     netdiskConfig: false,
     configFile: false,
+    cacheManager: false,
     dataMigration: false,
   });
 
@@ -5238,3 +5240,4 @@ export default function AdminPage() {
     </Suspense>
   );
 }
+
