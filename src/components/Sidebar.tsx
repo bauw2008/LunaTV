@@ -144,7 +144,7 @@ const Sidebar = ({ onToggle, activePath = '/' }: SidebarProps) => {
     if (menuConfig.showTvbox) {
       items.push({
         icon: Tv,
-        label: 'TVBox 配置',
+        label: 'TVBox',
         href: '/tvbox',
       });
     }

@@ -1796,6 +1796,20 @@ const FavoriteIcon = ({ filled }: { filled: boolean }) => {
 };
 
 export default function LivePage() {
+  const router = useRouter();
+
+  useEffect(() => {
+    const runtimeConfig = (window as any).RUNTIME_CONFIG;
+    if (!runtimeConfig?.MenuSettings?.showLive) {
+      router.replace('/');
+    }
+  }, [router]);
+
+  const runtimeConfig = (window as any).RUNTIME_CONFIG;
+  if (!runtimeConfig?.MenuSettings?.showLive) {
+    return null;
+  }
+
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <LivePageClient />

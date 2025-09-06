@@ -4,7 +4,7 @@
 
 import { Box, Cat, Clover, Film, Home, Radio, Star, Tv } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 interface MobileBottomNavProps {
@@ -16,57 +16,109 @@ interface MobileBottomNavProps {
 
 const MobileBottomNav = ({ activePath }: MobileBottomNavProps) => {
   const pathname = usePathname();
+  const router = useRouter();
 
   // 当前激活路径：优先使用传入的 activePath，否则回退到浏览器地址
   const currentActive = activePath ?? pathname;
 
-  const [navItems, setNavItems] = useState([
-    { icon: Home, label: '首页', href: '/' },
-    {
-      icon: Film,
-      label: '电影',
-      href: '/douban?type=movie',
-    },
-    {
-      icon: Tv,
-      label: '剧集',
-      href: '/douban?type=tv',
-    },
-    {
-      icon: Cat,
-      label: '动漫',
-      href: '/douban?type=anime',
-    },
-    {
-      icon: Clover,
-      label: '综艺',
-      href: '/douban?type=show',
-    },
-    {
-      icon: Radio,
-      label: '直播',
-      href: '/live',
-    },
-    {
-      icon: Box,
-      label: '盒子',
-      href: '/tvbox',
-    },
-  ]);
+  // 获取菜单配置
+  const [menuConfig, setMenuConfig] = useState({
+    showMovies: true,
+    showTVShows: true,
+    showAnime: true,
+    showVariety: true,
+    showLive: false,
+    showTvbox: false,
+  });
 
   useEffect(() => {
+    // 从全局配置获取菜单设置
     const runtimeConfig = (window as any).RUNTIME_CONFIG;
-    if (runtimeConfig?.CUSTOM_CATEGORIES?.length > 0) {
-      setNavItems((prevItems) => [
-        ...prevItems,
-        {
-          icon: Star,
-          label: '自定义',
-          href: '/douban?type=custom',
-        },
-      ]);
+    if (runtimeConfig?.MenuSettings) {
+      setMenuConfig({
+        showMovies: runtimeConfig.MenuSettings.showMovies ?? true,
+        showTVShows: runtimeConfig.MenuSettings.showTVShows ?? true,
+        showAnime: runtimeConfig.MenuSettings.showAnime ?? true,
+        showVariety: runtimeConfig.MenuSettings.showVariety ?? true,
+        showLive: runtimeConfig.MenuSettings.showLive ?? false,
+        showTvbox: runtimeConfig.MenuSettings.showTvbox ?? false,
+      });
     }
   }, []);
+
+  // 根据配置动态构建导航项
+  const [navItems, setNavItems] = useState<Array<{
+    icon: any;
+    label: string;
+    href: string;
+  }>>([]);
+
+  useEffect(() => {
+    const items = [
+      { icon: Home, label: '首页', href: '/' },
+    ];
+
+    // 根据配置添加菜单项
+    if (menuConfig.showMovies) {
+      items.push({
+        icon: Film,
+        label: '电影',
+        href: '/douban?type=movie',
+      });
+    }
+
+    if (menuConfig.showTVShows) {
+      items.push({
+        icon: Tv,
+        label: '剧集',
+        href: '/douban?type=tv',
+      });
+    }
+
+    if (menuConfig.showAnime) {
+      items.push({
+        icon: Cat,
+        label: '动漫',
+        href: '/douban?type=anime',
+      });
+    }
+
+    if (menuConfig.showVariety) {
+      items.push({
+        icon: Clover,
+        label: '综艺',
+        href: '/douban?type=show',
+      });
+    }
+
+    if (menuConfig.showLive) {
+      items.push({
+        icon: Radio,
+        label: '直播',
+        href: '/live',
+      });
+    }
+
+    if (menuConfig.showTvbox) {
+      items.push({
+        icon: Box,
+        label: '盒子',
+        href: '/tvbox',
+      });
+    }
+
+    // 添加自定义分类（如果有）
+    const runtimeConfig = (window as any).RUNTIME_CONFIG;
+    if (runtimeConfig?.CUSTOM_CATEGORIES?.length > 0) {
+      items.push({
+        icon: Star,
+        label: '自定义',
+        href: '/douban?type=custom',
+      });
+    }
+
+    setNavItems(items);
+  }, [menuConfig]);
 
   const isActive = (href: string) => {
     const typeMatch = href.match(/type=([^&]+)/)?.[1];
@@ -81,6 +133,22 @@ const MobileBottomNav = ({ activePath }: MobileBottomNavProps) => {
         decodedActive.includes(`type=${typeMatch}`))
     );
   };
+
+  // 路由守卫：检查当前路径是否被允许访问
+  useEffect(() => {
+    const path = currentActive;
+    
+    // 检查是否尝试访问被禁用的页面
+    if (path.startsWith('/live') && !menuConfig.showLive) {
+      router.replace('/');
+      return;
+    }
+
+    if (path.startsWith('/tvbox') && !menuConfig.showTvbox) {
+      router.replace('/');
+      return;
+    }
+  }, [currentActive, menuConfig, router]);
 
   return (
     <nav
@@ -99,10 +167,7 @@ const MobileBottomNav = ({ activePath }: MobileBottomNavProps) => {
             <li
               key={item.href}
               className='flex-shrink-0'
-              style={{ 
-                width: `${100 / navItems.length}vw`, 
-                minWidth: `${100 / navItems.length}vw` 
-              }}
+              style={{ width: '20vw', minWidth: '20vw' }}
             >
               <Link
                 href={item.href}

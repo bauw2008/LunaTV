@@ -1,13 +1,29 @@
 'use client';
 
 import { Monitor, Smartphone, Tv } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 import PageLayout from '@/components/PageLayout';
 
 export default function TVBoxConfigPage() {
   const [copied, setCopied] = useState(false);
   const [format, setFormat] = useState<'json' | 'base64'>('json');
+  const router = useRouter();
+
+  // 路由守卫：检查 TVBox 功能是否启用
+  useEffect(() => {
+    const runtimeConfig = (window as any).RUNTIME_CONFIG;
+    if (!runtimeConfig?.MenuSettings?.showTvbox) {
+      router.replace('/');
+    }
+  }, [router]);
+
+  // 如果功能被禁用，返回 null
+  const runtimeConfig = (window as any).RUNTIME_CONFIG;
+  if (!runtimeConfig?.MenuSettings?.showTvbox) {
+    return null;
+  }
 
   const getConfigUrl = useCallback(() => {
     if (typeof window === 'undefined') return '';
