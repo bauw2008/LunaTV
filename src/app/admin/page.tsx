@@ -3648,12 +3648,24 @@ const SiteConfigComponent = ({ config, refreshConfig }: { config: AdminConfig | 
 
         showSuccess('保存成功, 请刷新页面', showAlert);
         await refreshConfig();
-      } catch (err) {
-        showError(err instanceof Error ? err.message : '保存失败', showAlert);
-        throw err;
+      
+      // 更新全局配置，使侧边栏能够读取到最新配置
+      if (typeof window !== 'undefined') {
+        const runtimeConfig = (window as any).RUNTIME_CONFIG || {};
+        runtimeConfig.SiteConfig = runtimeConfig.SiteConfig || {};
+        runtimeConfig.SiteConfig.MenuSettings = siteSettings.MenuSettings;
+        (window as any).RUNTIME_CONFIG = runtimeConfig;
       }
-    });
-  };
+      
+      // 触发配置更新事件
+      window.dispatchEvent(new CustomEvent('configUpdated'));
+    } catch (err) {
+      showError(err instanceof Error ? err.message : '保存失败', showAlert);
+      throw err;
+    }
+  });
+};
+
 
   if (!config) {
     return (
