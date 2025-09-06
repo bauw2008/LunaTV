@@ -5123,6 +5123,23 @@ function AdminPageClient() {
               <NetDiskConfig config={config} refreshConfig={fetchConfig} />
             </CollapsibleTab>
 
+            {/* 缓存管理标签 - 仅站长可见 */}
+            {role === 'owner' && (
+              <CollapsibleTab
+                title='缓存管理'
+                icon={
+                  <Database
+                    size={20}
+                    className='text-gray-600 dark:text-gray-400'
+                  />
+                }
+                isExpanded={expandedTabs.cacheManager}
+                onToggle={() => toggleTab('cacheManager')}
+              >
+                <CacheManager />
+              </CollapsibleTab>
+            )}
+
             {/* 数据迁移标签 - 仅站长可见 */}
             {role === 'owner' && (
               <CollapsibleTab

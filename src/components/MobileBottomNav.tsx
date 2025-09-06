@@ -2,7 +2,7 @@
 
 'use client';
 
-import { Box, Cat, Clover, Film, Home, Radio, Star, Tv } from 'lucide-react';
+import { Box, Cat, Clover, Film, Home, Radio, Search, Star, Tv } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -17,7 +17,6 @@ interface MobileBottomNavProps {
 const MobileBottomNav = ({ activePath }: MobileBottomNavProps) => {
   const pathname = usePathname();
   const router = useRouter();
-
   // 当前激活路径：优先使用传入的 activePath，否则回退到浏览器地址
   const currentActive = activePath ?? pathname;
 
@@ -32,7 +31,6 @@ const MobileBottomNav = ({ activePath }: MobileBottomNavProps) => {
   });
 
   useEffect(() => {
-    // 从全局配置获取菜单设置
     const runtimeConfig = (window as any).RUNTIME_CONFIG;
     if (runtimeConfig?.MenuSettings) {
       setMenuConfig({
@@ -46,19 +44,20 @@ const MobileBottomNav = ({ activePath }: MobileBottomNavProps) => {
     }
   }, []);
 
-  // 根据配置动态构建导航项
+  // 导航项状态
   const [navItems, setNavItems] = useState<Array<{
     icon: any;
     label: string;
     href: string;
-  }>>([]);
+  }>>([
+    { icon: Home, label: '首页', href: '/' },
+    { icon: Search, label: '搜索', href: '/search' }
+  ]);
 
+  // 根据配置动态构建导航项
   useEffect(() => {
-    const items = [
-      { icon: Home, label: '首页', href: '/' },
-    ];
+    const items: typeof navItems = [];
 
-    // 根据配置添加菜单项
     if (menuConfig.showMovies) {
       items.push({
         icon: Film,
@@ -107,18 +106,33 @@ const MobileBottomNav = ({ activePath }: MobileBottomNavProps) => {
       });
     }
 
-    // 添加自定义分类（如果有）
+    // 保留固定项（首页/搜索），动态项拼接在后
+    setNavItems((prev) => {
+      const fixed = prev.filter(
+        (item) => item.href === '/' || item.href === '/search'
+      );
+      return [...fixed, ...items];
+    });
+  }, [menuConfig]);
+
+  // 添加自定义分类（独立逻辑）
+  useEffect(() => {
     const runtimeConfig = (window as any).RUNTIME_CONFIG;
     if (runtimeConfig?.CUSTOM_CATEGORIES?.length > 0) {
-      items.push({
-        icon: Star,
-        label: '自定义',
-        href: '/douban?type=custom',
+      setNavItems((prevItems) => {
+        const exists = prevItems.some((i) => i.href === '/douban?type=custom');
+        if (exists) return prevItems;
+        return [
+          ...prevItems,
+          {
+            icon: Star,
+            label: '自定义',
+            href: '/douban?type=custom',
+          },
+        ];
       });
     }
-
-    setNavItems(items);
-  }, [menuConfig]);
+  }, []);
 
   const isActive = (href: string) => {
     const typeMatch = href.match(/type=([^&]+)/)?.[1];
@@ -182,3 +196,4 @@ const MobileBottomNav = ({ activePath }: MobileBottomNavProps) => {
 };
 
 export default MobileBottomNav;
+
