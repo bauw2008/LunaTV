@@ -357,34 +357,24 @@ export function configSelfCheck(adminConfig: AdminConfig): AdminConfig {
       pansouUrl: 'https://so.252035.xyz',               // 默认公益服务
       timeout: 30,                                      // 默认30秒超时
       enabledCloudTypes: ['baidu', 'aliyun', 'quark', 'tianyi', 'uc', 'mobile', '115', 'pikpak', 'xunlei', '123', 'magnet', 'ed2k'] // 支持的所有网盘类型
-
-  // 确保 MenuSettings 存在并有完整的默认值
-  if (!adminConfig.SiteConfig.MenuSettings) {
-    adminConfig.SiteConfig.MenuSettings = {
-      showMovies: true,
-      showTVShows: true,
-      showAnime: true,
-      showVariety: true,
-      showLive: false,
-      showTvbox: false,
-    };
-  } else {
-    // 确保所有 MenuSettings 字段都有值
-    const defaultMenuSettings = {
-      showMovies: true,
-      showTVShows: true,
-      showAnime: true,
-      showVariety: true,
-      showLive: false,
-      showTvbox: false,
-    };
-    
-    adminConfig.SiteConfig.MenuSettings = {
-      ...defaultMenuSettings,
-      ...adminConfig.SiteConfig.MenuSettings
-    };
+          };
   }
 
+  // 确保 MenuSettings 存在并有完整默认值
+  const defaultMenuSettings = {
+    showMovies: true,
+    showTVShows: true,
+    showAnime: true,
+    showVariety: true,
+    showLive: false,
+    showTvbox: false,
+  };
+
+  adminConfig.SiteConfig.MenuSettings = {
+    ...defaultMenuSettings,
+    ...(adminConfig.SiteConfig.MenuSettings || {}),
+  };
+    
   // 站长变更自检
   const ownerUser = process.env.USERNAME;
 
