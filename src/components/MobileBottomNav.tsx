@@ -102,7 +102,7 @@ const MobileBottomNav = ({ activePath }: MobileBottomNavProps) => {
     if (menuConfig.showTvbox) {
       items.push({
         icon: Box,
-        label: '盒子',
+        label: 'tvbox',
         href: '/tvbox',
       });
     }
@@ -133,22 +133,6 @@ const MobileBottomNav = ({ activePath }: MobileBottomNavProps) => {
         decodedActive.includes(`type=${typeMatch}`))
     );
   };
-
-  // 路由守卫：检查当前路径是否被允许访问
-  useEffect(() => {
-    const path = currentActive;
-    
-    // 检查是否尝试访问被禁用的页面
-    if (path.startsWith('/live') && !menuConfig.showLive) {
-      router.replace('/');
-      return;
-    }
-
-    if (path.startsWith('/tvbox') && !menuConfig.showTvbox) {
-      router.replace('/');
-      return;
-    }
-  }, [currentActive, menuConfig, router]);
 
   return (
     <nav
