@@ -16,6 +16,14 @@ export interface AdminConfig {
     DoubanImageProxy: string;
     DisableYellowFilter: boolean;
     FluidSearch: boolean;
+    MenuSettings: {
+      showMovies: boolean;
+      showTVShows: boolean;
+      showAnime: boolean;
+      showVariety: boolean;
+      showLive: boolean;
+      showTvbox: boolean;
+      };
   };
   UserConfig: {
     AllowRegister?: boolean; // 是否允许用户注册，默认 true

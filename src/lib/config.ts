@@ -218,7 +218,16 @@ async function getInitConfig(configFile: string, subConfig: {
         process.env.NEXT_PUBLIC_DISABLE_YELLOW_FILTER === 'true',
       FluidSearch:
         process.env.NEXT_PUBLIC_FLUID_SEARCH !== 'false',
-    },
+      // 添加 MenuSettings 默认值
+      MenuSettings: {
+        showMovies: process.env.NEXT_PUBLIC_MENU_SHOW_MOVIES !== 'false',
+	showTVShows: process.env.NEXT_PUBLIC_MENU_SHOW_TVSHOWS !== 'false',
+	showAnime: process.env.NEXT_PUBLIC_MENU_SHOW_ANIME !== 'false',
+	showVariety: process.env.NEXT_PUBLIC_MENU_SHOW_VARIETY !== 'false',
+	showLive: process.env.NEXT_PUBLIC_MENU_SHOW_LIVE === 'true',
+	showTvbox: process.env.NEXT_PUBLIC_MENU_SHOW_TVBOX === 'true',
+	}
+      },
     UserConfig: {
       AllowRegister: true, // 默认允许注册
       Users: [],
@@ -348,6 +357,31 @@ export function configSelfCheck(adminConfig: AdminConfig): AdminConfig {
       pansouUrl: 'https://so.252035.xyz',               // 默认公益服务
       timeout: 30,                                      // 默认30秒超时
       enabledCloudTypes: ['baidu', 'aliyun', 'quark', 'tianyi', 'uc', 'mobile', '115', 'pikpak', 'xunlei', '123', 'magnet', 'ed2k'] // 支持的所有网盘类型
+
+  // 确保 MenuSettings 存在并有完整的默认值
+  if (!adminConfig.SiteConfig.MenuSettings) {
+    adminConfig.SiteConfig.MenuSettings = {
+      showMovies: true,
+      showTVShows: true,
+      showAnime: true,
+      showVariety: true,
+      showLive: false,
+      showTvbox: false,
+    };
+  } else {
+    // 确保所有 MenuSettings 字段都有值
+    const defaultMenuSettings = {
+      showMovies: true,
+      showTVShows: true,
+      showAnime: true,
+      showVariety: true,
+      showLive: false,
+      showTvbox: false,
+    };
+    
+    adminConfig.SiteConfig.MenuSettings = {
+      ...defaultMenuSettings,
+      ...adminConfig.SiteConfig.MenuSettings
     };
   }
 

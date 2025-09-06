@@ -68,7 +68,32 @@ const Sidebar = ({ onToggle, activePath = '/' }: SidebarProps) => {
     return false; // 默认展开
   });
 
-  // 首次挂载时读取 localStorage，以便刷新后仍保持上次的折叠状态
+// 获取完整的菜单配置
+const [menuConfig, setMenuConfig] = useState({
+  showMovies: true,
+  showTVShows: true,
+  showAnime: true,
+  showVariety: true,
+  showLive: false,
+  showTvbox: false,
+});
+
+useEffect(() => {
+  // 从全局配置获取完整的菜单设置
+  const runtimeConfig = (window as any).RUNTIME_CONFIG;
+  if (runtimeConfig?.SiteConfig?.MenuSettings) {
+    setMenuConfig({
+      showMovies: runtimeConfig.SiteConfig.MenuSettings.showMovies ?? true,
+      showTVShows: runtimeConfig.SiteConfig.MenuSettings.showTVShows ?? true,
+      showAnime: runtimeConfig.SiteConfig.MenuSettings.showAnime ?? true,
+      showVariety: runtimeConfig.SiteConfig.MenuSettings.showVariety ?? true,
+      showLive: runtimeConfig.SiteConfig.MenuSettings.showLive ?? false,
+      showTvbox: runtimeConfig.SiteConfig.MenuSettings.showTvbox ?? false,
+    });
+  }
+}, []);
+
+// 首次挂载时读取 localStorage，以便刷新后仍保持上次的折叠状态
   useLayoutEffect(() => {
     const saved = localStorage.getItem('sidebarCollapsed');
     if (saved !== null) {
@@ -124,38 +149,115 @@ const Sidebar = ({ onToggle, activePath = '/' }: SidebarProps) => {
     isCollapsed,
   };
 
-  const [menuItems, setMenuItems] = useState([
-    {
+// 根据配置动态构建菜单项
+const [menuItems, setMenuItems] = useState(() => {
+  const items = [];
+  // 其他菜单项
+  if (menuConfig.showMovies) {
+    items.push({
       icon: Film,
       label: '电影',
       href: '/douban?type=movie',
-    },
-    {
+    });
+  }
+
+  if (menuConfig.showTVShows) {
+    items.push({
       icon: Tv,
       label: '剧集',
       href: '/douban?type=tv',
-    },
-    {
+    });
+  }
+
+  if (menuConfig.showAnime) {
+    items.push({
       icon: Cat,
       label: '动漫',
       href: '/douban?type=anime',
-    },
-    {
+    });
+  }
+
+  if (menuConfig.showVariety) {
+    items.push({
       icon: Clover,
       label: '综艺',
       href: '/douban?type=show',
-    },
-    {
+    });
+  }
+
+  if (menuConfig.showLive) {
+    items.push({
       icon: Radio,
       label: '直播',
       href: '/live',
-    },
-    {
+    });
+  }
+
+  if (menuConfig.showTvbox) {
+    items.push({
       icon: Tv,
       label: 'TVBox 配置',
       href: '/tvbox',
-    },
-  ]);
+    });
+  }
+
+  return items;
+});
+
+// 当配置变化时更新菜单
+useEffect(() => {
+  const items = [];
+
+  if (menuConfig.showMovies) {
+    items.push({
+      icon: Film,
+      label: '电影',
+      href: '/douban?type=movie',
+    });
+  }
+
+  if (menuConfig.showTVShows) {
+    items.push({
+      icon: Tv,
+      label: '剧集',
+      href: '/douban?type=tv',
+    });
+  }
+
+  if (menuConfig.showAnime) {
+    items.push({
+      icon: Cat,
+      label: '动漫',
+      href: '/douban?type=anime',
+    });
+  }
+
+  if (menuConfig.showVariety) {
+    items.push({
+      icon: Clover,
+      label: '综艺',
+      href: '/douban?type=show',
+    });
+  }
+
+  if (menuConfig.showLive) {
+    items.push({
+      icon: Radio,
+      label: '直播',
+      href: '/live',
+    });
+  }
+
+  if (menuConfig.showTvbox) {
+    items.push({
+      icon: Tv,
+      label: 'TVBox 配置',
+      href: '/tvbox',
+    });
+  }
+
+  setMenuItems(items);
+}, [menuConfig]);
 
   useEffect(() => {
     const runtimeConfig = (window as any).RUNTIME_CONFIG;
@@ -254,12 +356,12 @@ const Sidebar = ({ onToggle, activePath = '/' }: SidebarProps) => {
                   // 解码URL以进行正确的比较
                   const decodedActive = decodeURIComponent(active);
                   const decodedItemHref = decodeURIComponent(item.href);
-
                   const isActive =
                     decodedActive === decodedItemHref ||
                     (decodedActive.startsWith('/douban') &&
                       decodedActive.includes(`type=${typeMatch}`));
                   const Icon = item.icon;
+                  
                   return (
                     <Link
                       key={item.label}

@@ -255,6 +255,16 @@ const useLoadingState = () => {
   return { loadingStates, setLoading, isLoading, withLoading };
 };
 
+// 新增菜单配置类型
+interface MenuSettings {
+  showMovies: boolean;
+  showTVShows: boolean;
+  showAnime: boolean;
+  showVariety: boolean;
+  showLive: boolean;
+  showTvbox: boolean;
+}
+
 // 新增站点配置类型
 interface SiteConfig {
   SiteName: string;
@@ -267,6 +277,7 @@ interface SiteConfig {
   DoubanImageProxy: string;
   DisableYellowFilter: boolean;
   FluidSearch: boolean;
+  MenuSettings: MenuSettings;
 }
 
 // 视频源数据类型
@@ -3450,6 +3461,16 @@ const ConfigFileComponent = ({ config, refreshConfig }: { config: AdminConfig | 
   );
 };
 
+// 菜单项标签映射
+const menuLabels = {
+  showMovies: '电影',
+  showTVShows: '剧集',
+  showAnime: '动漫',
+  showVariety: '综艺',
+  showLive: '直播',
+  showTvbox: 'TVBox'
+};
+
 // 新增站点配置组件
 const SiteConfigComponent = ({ config, refreshConfig }: { config: AdminConfig | null; refreshConfig: () => Promise<void> }) => {
   const { alertModal, showAlert, hideAlert } = useAlertModal();
@@ -3465,6 +3486,14 @@ const SiteConfigComponent = ({ config, refreshConfig }: { config: AdminConfig | 
     DoubanImageProxy: '',
     DisableYellowFilter: false,
     FluidSearch: true,
+    MenuSettings: {
+      showMovies: true,
+      showTVShows: true,
+      showAnime: true,
+      showVariety: true,
+      showLive: false,
+      showTvbox: false,
+    }
   });
 
   // 豆瓣数据源相关状态
@@ -3520,6 +3549,15 @@ const SiteConfigComponent = ({ config, refreshConfig }: { config: AdminConfig | 
     if (config?.SiteConfig) {
       setSiteSettings({
         ...config.SiteConfig,
+	// 确保 MenuSettings 有默认值
+	MenuSettings: {
+	  showMovies: config.SiteConfig.MenuSettings.showMovies ?? true,
+	  showTVShows: config.SiteConfig.MenuSettings.showTVShows ?? true,
+	  showAnime: config.SiteConfig.MenuSettings.showAnime ?? true,
+	  showVariety: config.SiteConfig.MenuSettings.showVariety ?? true,
+	  showLive: config.SiteConfig.MenuSettings.showLive ?? false,
+	  showTvbox: config.SiteConfig.MenuSettings.showTvbox ?? false,
+	  },
         DoubanProxyType: config.SiteConfig.DoubanProxyType || 'direct',
         DoubanProxy: config.SiteConfig.DoubanProxy || '',
         DoubanImageProxyType:
@@ -3566,6 +3604,17 @@ const SiteConfigComponent = ({ config, refreshConfig }: { config: AdminConfig | 
     }
   }, [isDoubanImageProxyDropdownOpen]);
 
+  // 切换菜单显示状态
+  const handleToggleMenu = (menuKey: keyof MenuSettings) => {
+    setSiteSettings(prev => ({
+      ...prev,
+      MenuSettings: {
+        ...prev.MenuSettings,
+        [menuKey]: !prev.MenuSettings[menuKey]
+      }
+    }));
+  };
+	
   // 处理豆瓣数据源变化
   const handleDoubanDataSourceChange = (value: string) => {
     setSiteSettings((prev) => ({
@@ -3589,7 +3638,10 @@ const SiteConfigComponent = ({ config, refreshConfig }: { config: AdminConfig | 
         const resp = await fetch('/api/admin/site', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...siteSettings }),
+          body: JSON.stringify({ 
+            ...siteSettings,
+            MenuSettings: siteSettings.MenuSettings 
+          }),
         });
 
         if (!resp.ok) {
@@ -3651,6 +3703,39 @@ const SiteConfigComponent = ({ config, refreshConfig }: { config: AdminConfig | 
           rows={3}
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-green-500 focus:border-transparent"
         />
+      </div>
+	  
+	  {/* 菜单显示设置 */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-700">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+          菜单显示设置
+        </h3>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+          控制导航栏中各菜单项的显示与隐藏
+        </p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {Object.entries(siteSettings.MenuSettings || {}).map(([key, value]) => (
+            <div key={key} className="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-600 rounded-lg">
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                {menuLabels[key as keyof MenuSettings]}
+              </label>
+              <button
+                type="button"
+                onClick={() => handleToggleMenu(key as keyof MenuSettings)}
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
+                  value ? buttonStyles.toggleOn : buttonStyles.toggleOff
+                }`}
+              >
+                <span
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full ${buttonStyles.toggleThumb} shadow transition duration-200 ease-in-out ${
+                    value ? buttonStyles.toggleThumbOn : buttonStyles.toggleThumbOff
+                  }`}
+                />
+              </button>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* 豆瓣数据源设置 */}

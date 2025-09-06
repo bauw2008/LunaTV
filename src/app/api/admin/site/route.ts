@@ -39,6 +39,7 @@ export async function POST(request: NextRequest) {
       DoubanImageProxy,
       DisableYellowFilter,
       FluidSearch,
+      MenuSettings,
     } = body as {
       SiteName: string;
       Announcement: string;
@@ -50,6 +51,16 @@ export async function POST(request: NextRequest) {
       DoubanImageProxy: string;
       DisableYellowFilter: boolean;
       FluidSearch: boolean;
+      MenuSettings: { // 添加 MenuSettings 类型定义
+        showHome: boolean;
+	showSearch: boolean;
+	showMovies: boolean;
+	showTVShows: boolean;
+	showAnime: boolean;
+	showVariety: boolean;
+	showLive: boolean;
+	showTvbox: boolean;
+      };	  
     };
 
     // 参数校验
@@ -63,7 +74,14 @@ export async function POST(request: NextRequest) {
       typeof DoubanImageProxyType !== 'string' ||
       typeof DoubanImageProxy !== 'string' ||
       typeof DisableYellowFilter !== 'boolean' ||
-      typeof FluidSearch !== 'boolean'
+      typeof FluidSearch !== 'boolean' ||
+      // 添加 MenuSettings 字段的校验
+      typeof MenuSettings?.showMovies !== 'boolean' ||
+      typeof MenuSettings?.showTVShows !== 'boolean' ||
+      typeof MenuSettings?.showAnime !== 'boolean' ||
+      typeof MenuSettings?.showVariety !== 'boolean' ||
+      typeof MenuSettings?.showLive !== 'boolean' ||
+      typeof MenuSettings?.showTvbox !== 'boolean'  
     ) {
       return NextResponse.json({ error: '参数格式错误' }, { status: 400 });
     }
@@ -93,6 +111,14 @@ export async function POST(request: NextRequest) {
       DoubanImageProxy,
       DisableYellowFilter,
       FluidSearch,
+      MenuSettings: MenuSettings || { // 添加 MenuSettings
+        showMovies: true,
+	showTVShows: true,
+	showAnime: true,
+	showVariety: true,
+	showLive: false,
+	showTvbox: false,
+	}	  
     };
 
     // 写入数据库
