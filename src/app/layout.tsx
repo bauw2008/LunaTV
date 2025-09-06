@@ -89,7 +89,25 @@ export default async function RootLayout({
     DISABLE_YELLOW_FILTER: disableYellowFilter,
     CUSTOM_CATEGORIES: customCategories,
     FLUID_SEARCH: fluidSearch,
-  };
+   // 添加 SiteConfig 包含 MenuSettings
+  SiteConfig: {
+    MenuSettings: storageType !== 'localstorage' ? {
+      showMovies: config.SiteConfig.MenuSettings.showMovies ?? true,
+      showTVShows: config.SiteConfig.MenuSettings.showTVShows ?? true,
+      showAnime: config.SiteConfig.MenuSettings.showAnime ?? true,
+      showVariety: config.SiteConfig.MenuSettings.showVariety ?? true,
+      showLive: config.SiteConfig.MenuSettings.showLive ?? false,
+      showTvbox: config.SiteConfig.MenuSettings.showTvbox ?? false,
+    } : {
+      showMovies: true,
+      showTVShows: true,
+      showAnime: true,
+      showVariety: true,
+      showLive: false,
+      showTvbox: false,
+    }
+  }
+};
 
   return (
     <html lang='zh-CN' suppressHydrationWarning>
