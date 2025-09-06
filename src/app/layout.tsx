@@ -59,6 +59,17 @@ export default async function RootLayout({
     type: 'movie' | 'tv';
     query: string;
   }[];
+  
+  // 添加 MenuSettings 的默认值
+  let menuSettings = {
+    showMovies: true,
+    showTVShows: true,
+    showAnime: true,
+    showVariety: true,
+    showLive: false,
+    showTvbox: false,
+  };
+  
   if (storageType !== 'localstorage') {
     const config = await getConfig();
     siteName = config.SiteConfig.SiteName;
@@ -77,6 +88,12 @@ export default async function RootLayout({
       query: category.query,
     }));
     fluidSearch = config.SiteConfig.FluidSearch;
+    
+    // 从配置中获取 MenuSettings，如果没有则使用默认值
+    menuSettings = {
+      ...menuSettings,
+      ...config.SiteConfig.MenuSettings,
+    };
   }
 
   // 将运行时配置注入到全局 window 对象，供客户端在运行时读取
@@ -89,16 +106,8 @@ export default async function RootLayout({
     DISABLE_YELLOW_FILTER: disableYellowFilter,
     CUSTOM_CATEGORIES: customCategories,
     FLUID_SEARCH: fluidSearch,
-
-    MenuSettings: {
-      showMovies: config?.SiteConfig?.MenuSettings?.showMovies ?? true,
-      showTVShows: config?.SiteConfig?.MenuSettings?.showTVShows ?? true,
-      showAnime: config?.SiteConfig?.MenuSettings?.showAnime ?? true,
-      showVariety: config?.SiteConfig?.MenuSettings?.showVariety ?? true,
-      showLive: config?.SiteConfig?.MenuSettings?.showLive ?? false,
-      showTvbox: config?.SiteConfig?.MenuSettings?.showTvbox ?? false,
-    }
-};
+    MenuSettings: menuSettings,
+   };
 
   return (
     <html lang='zh-CN' suppressHydrationWarning>
