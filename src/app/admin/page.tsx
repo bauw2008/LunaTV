@@ -3638,10 +3638,7 @@ const SiteConfigComponent = ({ config, refreshConfig }: { config: AdminConfig | 
         const resp = await fetch('/api/admin/site', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            ...siteSettings,
-            MenuSettings: siteSettings.MenuSettings 
-          }),
+          body: JSON.stringify({ ...siteSettings }),
         });
 
         if (!resp.ok) {
